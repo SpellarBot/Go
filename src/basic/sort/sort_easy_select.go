@@ -1,6 +1,6 @@
 package MySort
 
-func Sort_easy_select(a []int) {
+func SortEasySelect(a []int) {
 	N := len(a)
 	var k int
 	var x int

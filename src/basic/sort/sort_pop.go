@@ -1,7 +1,7 @@
-package MySort
+﻿package MySort
 
 //冒泡排序
-func Sort_pop(a []int) {
+func SortPop(a []int) {
 	N := len(a)
 	var b int
 	for i := 0; i < N; i++ {

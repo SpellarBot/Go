@@ -30,7 +30,7 @@ func sift(a []int, k int, m int) {
 
 }
 
-func Sort_heap(a []int) {
+func SortHeap(a []int) {
 	N := len(a)
 	var x int
 	for i := N / 2; i >= 1; i-- {

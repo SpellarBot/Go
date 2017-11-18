@@ -1,7 +1,7 @@
-package MySort
+﻿package MySort
 
 //插入排序
-func Sort_insert(a []int) {
+func SortInsert(a []int) {
 	for i, k := range a {
 		if i == 0 {
 			continue

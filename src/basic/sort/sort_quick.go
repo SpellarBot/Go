@@ -1,4 +1,4 @@
-package MySort
+﻿package MySort
 
 //快速排序
 
@@ -46,7 +46,7 @@ func partition(a []int, first int, end int) int {
 	return m
 }
 
-func sort_quick(a []int) {
+func SortQuick(a []int) {
 	N := len(a)
 	if N <= 1 {
 		return
