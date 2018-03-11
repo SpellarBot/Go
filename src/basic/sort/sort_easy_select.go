@@ -1,4 +1,4 @@
-package MySort
+package sort
 
 func SortEasySelect(a []int) {
 	N := len(a)

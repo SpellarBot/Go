@@ -1,4 +1,4 @@
-﻿package MySort
+﻿package sort
 
 //冒泡排序
 func SortPop(a []int) {

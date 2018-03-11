@@ -1,4 +1,4 @@
-package MySort
+package sort
 
 import (
 	"fmt"

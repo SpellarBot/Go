@@ -1,4 +1,4 @@
-﻿package MySort
+﻿package sort
 
 //插入排序
 func SortInsert(a []int) {
