@@ -53,6 +53,6 @@ func SortQuick(a []int) {
 	}
 	i := partition(a, 0, N-1)
 	//fmt.Println(i)
-	sort_quick(a[0 : i+1])
-	sort_quick(a[i+1 : N])
+	SortQuick(a[0 : i+1])
+	SortQuick(a[i+1 : N])
 }
