@@ -48,7 +48,7 @@ type Locate struct {
 }
 
 type LogRecord struct {
-	Level    Level     // The log level
+	LogLevel Level     // The log level
 	Location Locate    // The Log's location
 	Created  time.Time // The time at which the log message was created (nanoseconds)
 	Message  string    // The log message
@@ -91,7 +91,7 @@ type FileLogWriter struct {
 	logTime time.Time
 
 	// Define log level and rotate type
-	LogLevel   Level
+	MinLevel   Level
 	rotateType string
 
 	// Lock
@@ -99,48 +99,52 @@ type FileLogWriter struct {
 }
 
 // a logwriter without rotate
-func NewDefaultFileLogWriter(path string, filename string) *FileLogWriter {
+func NewDefaultFileLogWriter(path string, filename string, bufferlength int, console bool) *FileLogWriter {
 	var fileLogWriter FileLogWriter
 	fileLogWriter = FileLogWriter{
 		Path:         path,
 		FilePrefix:   filename,
-		Console:      true,
+		Console:      console,
 		Hourly:       false,
 		Daily:        false,
 		Maxsize:      0,
 		Maxline:      0,
-		BufferLength: 100,
+		BufferLength: bufferlength,
 		Maxbackup:    168,
-		LogLevel:     FINEST,
+		MinLevel:     FINEST,
 	}
 	return &fileLogWriter
 }
 
 // a hourly logwriter
-func NewHourlyFileLogWriter(path string, filename string) *FileLogWriter {
-	fileLogWriter := NewDefaultFileLogWriter(path, filename)
+func NewHourlyFileLogWriter(path string, filename string, bufferlength int, console bool, maxbackup int) *FileLogWriter {
+	fileLogWriter := NewDefaultFileLogWriter(path, filename, bufferlength, console)
 	fileLogWriter.SetHourly()
+	fileLogWriter.SetMaxbackup(maxbackup)
 	return fileLogWriter
 }
 
 // a daily logwriter
-func NewDailytFileLogWriter(path string, filename string) *FileLogWriter {
-	fileLogWriter := NewDefaultFileLogWriter(path, filename)
+func NewDailytFileLogWriter(path string, filename string, bufferlength int, console bool, maxbackup int) *FileLogWriter {
+	fileLogWriter := NewDefaultFileLogWriter(path, filename, bufferlength, console)
 	fileLogWriter.SetDaily()
+	fileLogWriter.SetMaxbackup(maxbackup)
 	return fileLogWriter
 }
 
 // a maxsize logwriter
-func NewSizeFileLogWriter(path string, filename string, maxsize int64) *FileLogWriter {
-	fileLogWriter := NewDefaultFileLogWriter(path, filename)
+func NewSizeFileLogWriter(path string, filename string, maxsize int64, bufferlength int, console bool, maxbackup int) *FileLogWriter {
+	fileLogWriter := NewDefaultFileLogWriter(path, filename, bufferlength, console)
 	fileLogWriter.SetMaxSize(maxsize)
+	fileLogWriter.SetMaxbackup(maxbackup)
 	return fileLogWriter
 }
 
 // a maxline logwriter
-func NewLineFileLogWriter(path string, filename string, maxline int64) *FileLogWriter {
-	fileLogWriter := NewDefaultFileLogWriter(path, filename)
-	fileLogWriter.SetMaxSize(maxline)
+func NewLineFileLogWriter(path string, filename string, maxline int64, bufferlength int, console bool, maxbackup int) *FileLogWriter {
+	fileLogWriter := NewDefaultFileLogWriter(path, filename, bufferlength, console)
+	fileLogWriter.SetMaxLine(maxline)
+	fileLogWriter.SetMaxbackup(maxbackup)
 	return fileLogWriter
 }
 
@@ -165,11 +169,16 @@ func (w *FileLogWriter) Init() {
 	w.rec = make(chan *LogRecord, w.BufferLength)
 	w.rotateMutex = sync.RWMutex{}
 	go w.write()
-	go w.delete()
+	if w.rotateType != "None" {
+		if w.Maxbackup <= 0 {
+			w.Maxbackup = 100000000000
+		}
+		go w.delete()
+	}
 
 }
 
-func (w *FileLogWriter) GetInfoLogFun() func(string) {
+func (w *FileLogWriter) GetLogFun(level Level) func(string) {
 	return func(msg string) {
 		pc, file, line, ok := runtime.Caller(1)
 		if ok == true {
@@ -177,9 +186,9 @@ func (w *FileLogWriter) GetInfoLogFun() func(string) {
 			_, currentfile := filepath.Split(file)
 			fun := f.Name()
 			rec := LogRecord{
-				Created: time.Now(),
-				Level:   INFO,
-				Message: msg,
+				Created:  time.Now(),
+				LogLevel: level,
+				Message:  msg,
 				Location: Locate{
 					FileName: currentfile,
 					Line:     line,
@@ -223,9 +232,9 @@ func (w *FileLogWriter) addLog(level Level, msg string) {
 		_, currentfile := filepath.Split(file)
 		fun := f.Name()
 		rec := LogRecord{
-			Created: time.Now(),
-			Level:   level,
-			Message: msg,
+			Created:  time.Now(),
+			LogLevel: level,
+			Message:  msg,
 			Location: Locate{
 				FileName: currentfile,
 				Line:     line,
@@ -292,7 +301,7 @@ func (w *FileLogWriter) write() {
 		w.rotate()
 		record := <-w.rec
 		log := LogRecord2String(record)
-		if record.Level >= w.LogLevel {
+		if record.LogLevel >= w.MinLevel {
 			fmt.Fprintln(w.file, log)
 			atomic.AddInt64(&w.maxlineCurline, 1)
 			atomic.AddInt64(&w.maxsizeCursize, int64(len([]byte(log))))
@@ -372,6 +381,10 @@ func (w *FileLogWriter) changefile(oldfname string, newfname string) {
 
 }
 
+func (w *FileLogWriter) SetMaxbackup(maxbackup int) {
+	w.Maxbackup = maxbackup
+}
+
 func (w *FileLogWriter) SetConsole(console bool) {
 	w.Console = console
 }
@@ -404,11 +417,19 @@ func (w *FileLogWriter) SetMaxLine(maxline int64) {
 	}
 }
 
+func (w *FileLogWriter) SetBufferLength(bufferlength int) {
+	w.BufferLength = bufferlength
+}
+
+func (w *FileLogWriter) SetLogLevel(level Level) {
+	w.MinLevel = level
+}
+
 // LogRecord 2 string
 func LogRecord2String(logRecord *LogRecord) string {
 	sTime := logRecord.Created.Format("2006/01/02 15:04:05 MST")
 	sLocation := fmt.Sprintf("%s:%s:%d", logRecord.Location.FileName, logRecord.Location.Func, logRecord.Location.Line)
-	sLevel := logRecord.Level
+	sLevel := logRecord.LogLevel
 	return fmt.Sprintf("[%s] [%s] (%s) : %s", sTime, levels[sLevel], sLocation, logRecord.Message)
 }
 

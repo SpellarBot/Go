@@ -8,32 +8,32 @@ func NewFileLogger() FileLogger {
 	return make(FileLogger)
 }
 
-func (l FileLogger) AddLogger(moudle string, path string, filename string) {
-	fileLogWriter := NewDefaultFileLogWriter(path, filename)
+func (l FileLogger) AddLogger(moudle string, path string, filename string, bufferlength int, console bool) {
+	fileLogWriter := NewDefaultFileLogWriter(path, filename, bufferlength, console)
 	fileLogWriter.Init()
 	l[moudle] = fileLogWriter
 }
 
-func (l FileLogger) AddHourlyLogger(moudle string, path string, filename string) {
-	fileLogWriter := NewHourlyFileLogWriter(path, filename)
+func (l FileLogger) AddHourlyLogger(moudle string, path string, filename string, bufferlength int, console bool, maxbackup int) {
+	fileLogWriter := NewHourlyFileLogWriter(path, filename, bufferlength, console, maxbackup)
 	fileLogWriter.Init()
 	l[moudle] = fileLogWriter
 }
 
-func (l FileLogger) AddDailyLogger(moudle string, path string, filename string) {
-	fileLogWriter := NewDailytFileLogWriter(path, filename)
+func (l FileLogger) AddDailyLogger(moudle string, path string, filename string, bufferlength int, console bool, maxbackup int) {
+	fileLogWriter := NewDailytFileLogWriter(path, filename, bufferlength, console, maxbackup)
 	fileLogWriter.Init()
 	l[moudle] = fileLogWriter
 }
 
-func (l FileLogger) AddSizeLogger(moudle string, path string, filename string, maxsize int64) {
-	fileLogWriter := NewSizeFileLogWriter(path, filename, maxsize)
+func (l FileLogger) AddSizeLogger(moudle string, path string, filename string, maxsize int64, bufferlength int, console bool, maxbackup int) {
+	fileLogWriter := NewSizeFileLogWriter(path, filename, maxsize, bufferlength, console, maxbackup)
 	fileLogWriter.Init()
 	l[moudle] = fileLogWriter
 }
 
-func (l FileLogger) AddLineLogger(moudle string, path string, filename string, maxline int64) {
-	fileLogWriter := NewLineFileLogWriter(path, filename, maxline)
+func (l FileLogger) AddLineLogger(moudle string, path string, filename string, maxline int64, bufferlength int, console bool, maxbackup int) {
+	fileLogWriter := NewLineFileLogWriter(path, filename, maxline, bufferlength, console, maxbackup)
 	fileLogWriter.Init()
 	l[moudle] = fileLogWriter
 }
@@ -50,7 +50,7 @@ func (l FileLogger) GetWriter(moudle string) *FileLogWriter {
 	return l[moudle]
 }
 
-// 获取FileLogWriter对象的Info函数
-func (l FileLogger) GetInfoLogFun(moudle string) func(string) {
-	return l[moudle].GetInfoLogFun()
+// 获取FileLogWriter对象的函数
+func (l FileLogger) GetLogFun(level Level, moudle string) func(string) {
+	return l[moudle].GetLogFun(level)
 }
