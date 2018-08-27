@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+type LoggerServer struct {
+	port   string
+	logger *FileLogger
+}
+
 var (
 	port = flag.String("p", "12124", "Port number to listen on")
 )

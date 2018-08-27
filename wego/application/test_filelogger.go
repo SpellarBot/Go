@@ -18,13 +18,13 @@ func Log(writer func(string)) {
 func main() {
 	fileLogs = logger.NewFileLogger()
 	defer fileLogs.Close()
-	fileLogs.AddDailyLogger("Daily", "./", "DailyLog")
+	fileLogs.AddDailyLogger("Daily", "./", "DailyLog", 100, true, 10)
 	// fileLogs.AddLineLogger("Line", "./", "LineLog", 100000)
 	// fileLogs.AddSizeLogger("Size", "./", "SizeLog", 100000)
 	// fileLogs.AddLogger("Default", "./", "DefaultLog")
 
 	fileLog := fileLogs.GetWriter("Daily")
-	logFun := fileLogs.GetInfoLogFun("Daily")
+	logFun := fileLogs.GetLogFun(logger.ERROR, "Daily")
 
 	logFun("I am logfun")
 	fileLog.Info("I am logger")
