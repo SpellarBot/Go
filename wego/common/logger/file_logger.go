@@ -45,10 +45,12 @@ func (l FileLogger) Close() {
 	}
 }
 
-func (l FileLogger) GetLogger(moudle string) *FileLogWriter {
+// 获取一个FileLogWriter对象
+func (l FileLogger) GetWriter(moudle string) *FileLogWriter {
 	return l[moudle]
 }
 
-func (l FileLogger) GetInfoWriter(moudle string) func(string) {
-	return l[moudle].GetLogger()
+// 获取FileLogWriter对象的Info函数
+func (l FileLogger) GetInfoLogFun(moudle string) func(string) {
+	return l[moudle].GetInfoLogFun()
 }

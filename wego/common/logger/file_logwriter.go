@@ -169,7 +169,7 @@ func (w *FileLogWriter) Init() {
 
 }
 
-func (w *FileLogWriter) GetLogger() func(string) {
+func (w *FileLogWriter) GetInfoLogFun() func(string) {
 	return func(msg string) {
 		pc, file, line, ok := runtime.Caller(1)
 		if ok == true {

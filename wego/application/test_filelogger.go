@@ -23,8 +23,8 @@ func main() {
 	// fileLogs.AddSizeLogger("Size", "./", "SizeLog", 100000)
 	// fileLogs.AddLogger("Default", "./", "DefaultLog")
 
-	fileLog := fileLogs.GetLogger("Daily")
-	logFun := fileLogs.GetInfoWriter("Daily")
+	fileLog := fileLogs.GetWriter("Daily")
+	logFun := fileLogs.GetInfoLogFun("Daily")
 
 	logFun("I am logfun")
 	fileLog.Info("I am logger")

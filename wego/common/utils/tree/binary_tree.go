@@ -4,26 +4,27 @@ import (
 	"fmt"
 )
 
-type BinaryNode struct{
+type BinaryNode struct {
 	Value float64
-	Left *BinaryNode
+	Left  *BinaryNode
 	Right *BinaryNode
 }
-func (B *BinaryNode) Set_value(a float64){
+
+func (B *BinaryNode) Set_value(a float64) {
 	(*B).Value = a
 }
-func (B *BinaryNode) Set_left(b1 BinaryNode){
+func (B *BinaryNode) Set_left(b1 BinaryNode) {
 	(*B).Left = &b1
 }
-func (B *BinaryNode) Set_right(b1 BinaryNode){
+func (B *BinaryNode) Set_right(b1 BinaryNode) {
 	(*B).Right = &b1
 }
-
 
 type BinaryTree struct {
 	Parent BinaryNode
 }
-func (B *BinaryTree) InitWithArray(a []float64){
+
+func (B *BinaryTree) InitWithArray(a []float64) {
 	p0 := &(*B).Parent
 	N := len(a)
 	(*p0).Value = a[0]
@@ -31,9 +32,9 @@ func (B *BinaryTree) InitWithArray(a []float64){
 	return
 }
 
-func InitWithArray(B *BinaryNode,a []float64, k int, N int){
-	fmt.Println(B.Value,N,k)
-	if 2*k+1 < N{
+func InitWithArray(B *BinaryNode, a []float64, k int, N int) {
+	fmt.Println(B.Value, N, k)
+	if 2*k+1 < N {
 		B1 := &BinaryNode{}
 		(*B1).Value = a[2*k+1]
 		B.Left = B1
@@ -48,26 +49,24 @@ func InitWithArray(B *BinaryNode,a []float64, k int, N int){
 	return
 }
 
-
-func (B BinaryTree) PreOrder(value *[]float64){
+func (B BinaryTree) PreOrder(value *[]float64) {
 	a := B.Parent
 	*value = PreOrder(a, *value)
 }
 
-func PreOrder(N BinaryNode, a []float64)([]float64){
+func PreOrder(N BinaryNode, a []float64) []float64 {
 	a = append(a, N.Value)
-	fmt.Println(N.Value,len(a))
-	if N.Left == nil && N.Right== nil {
+	fmt.Println(N.Value, len(a))
+	if N.Left == nil && N.Right == nil {
 		return a
 	} else {
 		//fmt.Println("---------")
-		if N.Left != nil{
+		if N.Left != nil {
 			a = PreOrder(*(N.Left), a)
 		}
-		if N.Right != nil{
+		if N.Right != nil {
 			a = PreOrder(*(N.Right), a)
 		}
 	}
 	return a
 }
-
