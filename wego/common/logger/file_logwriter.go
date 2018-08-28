@@ -148,7 +148,7 @@ func NewLineFileLogWriter(path string, filename string, maxline int64, bufferlen
 	return fileLogWriter
 }
 
-func (w *FileLogWriter) Init() {
+func (w *FileLogWriter) Init() error {
 	switch {
 	case w.Hourly:
 		w.rotateType = "Hourly"
@@ -175,6 +175,7 @@ func (w *FileLogWriter) Init() {
 		}
 		go w.delete()
 	}
+	return nil
 
 }
 
