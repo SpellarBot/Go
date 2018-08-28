@@ -99,7 +99,7 @@ type FileLogWriter struct {
 }
 
 // a logwriter without rotate
-func NewDefaultFileLogWriter(path string, filename string, bufferlength int, console bool) *FileLogWriter {
+func NewDefaultFileLogWriter(path string, filename string, bufferlength int, console bool) (*FileLogWriter, error) {
 	var fileLogWriter FileLogWriter
 	fileLogWriter = FileLogWriter{
 		Path:         path,
@@ -113,39 +113,92 @@ func NewDefaultFileLogWriter(path string, filename string, bufferlength int, con
 		Maxbackup:    168,
 		MinLevel:     FINEST,
 	}
-	return &fileLogWriter
+	err := fileLogWriter.Init()
+	return &fileLogWriter, err
 }
 
 // a hourly logwriter
-func NewHourlyFileLogWriter(path string, filename string, bufferlength int, console bool, maxbackup int) *FileLogWriter {
-	fileLogWriter := NewDefaultFileLogWriter(path, filename, bufferlength, console)
+func NewHourlyFileLogWriter(path string, filename string, bufferlength int, console bool, maxbackup int) (*FileLogWriter, error) {
+	var fileLogWriter FileLogWriter
+	fileLogWriter = FileLogWriter{
+		Path:         path,
+		FilePrefix:   filename,
+		Console:      console,
+		Hourly:       false,
+		Daily:        false,
+		Maxsize:      0,
+		Maxline:      0,
+		BufferLength: bufferlength,
+		Maxbackup:    168,
+		MinLevel:     FINEST,
+	}
 	fileLogWriter.SetHourly()
 	fileLogWriter.SetMaxbackup(maxbackup)
-	return fileLogWriter
+	err := fileLogWriter.Init()
+	return &fileLogWriter, err
 }
 
 // a daily logwriter
-func NewDailytFileLogWriter(path string, filename string, bufferlength int, console bool, maxbackup int) *FileLogWriter {
-	fileLogWriter := NewDefaultFileLogWriter(path, filename, bufferlength, console)
+func NewDailytFileLogWriter(path string, filename string, bufferlength int, console bool, maxbackup int) (*FileLogWriter, error) {
+	var fileLogWriter FileLogWriter
+	fileLogWriter = FileLogWriter{
+		Path:         path,
+		FilePrefix:   filename,
+		Console:      console,
+		Hourly:       false,
+		Daily:        false,
+		Maxsize:      0,
+		Maxline:      0,
+		BufferLength: bufferlength,
+		Maxbackup:    168,
+		MinLevel:     FINEST,
+	}
 	fileLogWriter.SetDaily()
 	fileLogWriter.SetMaxbackup(maxbackup)
-	return fileLogWriter
+	err := fileLogWriter.Init()
+	return &fileLogWriter, err
 }
 
 // a maxsize logwriter
-func NewSizeFileLogWriter(path string, filename string, maxsize int64, bufferlength int, console bool, maxbackup int) *FileLogWriter {
-	fileLogWriter := NewDefaultFileLogWriter(path, filename, bufferlength, console)
+func NewSizeFileLogWriter(path string, filename string, maxsize int64, bufferlength int, console bool, maxbackup int) (*FileLogWriter, error) {
+	var fileLogWriter FileLogWriter
+	fileLogWriter = FileLogWriter{
+		Path:         path,
+		FilePrefix:   filename,
+		Console:      console,
+		Hourly:       false,
+		Daily:        false,
+		Maxsize:      0,
+		Maxline:      0,
+		BufferLength: bufferlength,
+		Maxbackup:    168,
+		MinLevel:     FINEST,
+	}
 	fileLogWriter.SetMaxSize(maxsize)
 	fileLogWriter.SetMaxbackup(maxbackup)
-	return fileLogWriter
+	err := fileLogWriter.Init()
+	return &fileLogWriter, err
 }
 
 // a maxline logwriter
-func NewLineFileLogWriter(path string, filename string, maxline int64, bufferlength int, console bool, maxbackup int) *FileLogWriter {
-	fileLogWriter := NewDefaultFileLogWriter(path, filename, bufferlength, console)
+func NewLineFileLogWriter(path string, filename string, maxline int64, bufferlength int, console bool, maxbackup int) (*FileLogWriter, error) {
+	var fileLogWriter FileLogWriter
+	fileLogWriter = FileLogWriter{
+		Path:         path,
+		FilePrefix:   filename,
+		Console:      console,
+		Hourly:       false,
+		Daily:        false,
+		Maxsize:      0,
+		Maxline:      0,
+		BufferLength: bufferlength,
+		Maxbackup:    168,
+		MinLevel:     FINEST,
+	}
 	fileLogWriter.SetMaxLine(maxline)
 	fileLogWriter.SetMaxbackup(maxbackup)
-	return fileLogWriter
+	err := fileLogWriter.Init()
+	return &fileLogWriter, err
 }
 
 func (w *FileLogWriter) Init() error {
