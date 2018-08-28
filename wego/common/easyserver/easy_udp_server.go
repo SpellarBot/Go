@@ -1,9 +1,8 @@
-package main
+package easyserver
 
 import (
 	"fmt"
 	"net"
-	"os"
 	"runtime"
 )
 
@@ -72,14 +71,15 @@ func (u *EasyUdpServer) Init() error {
 	var err error
 	u.listener, err = getUdpListener(string(u.UType), u.Port)
 	if err == nil {
+		u.listener.SetReadBuffer(u.ReadBuffer)
+		u.listener.SetWriteBuffer(u.WriteBuffer)
 		u.Logger(fmt.Sprintf("Serve Start Succ At Port %d", u.Port))
 		u.Logger(fmt.Sprintf("Serve Start %d Threads", u.Threads))
 		for i := 0; i < u.Threads; i++ {
 			go u.listen()
 		}
 	}
-	u.listener.SetReadBuffer(u.ReadBuffer)
-	u.listener.SetWriteBuffer(u.WriteBuffer)
+
 	return err
 }
 
@@ -119,7 +119,7 @@ func (u *EasyUdpServer) writeToUdp(remoteAddr *net.UDPAddr, send string) {
 	u.Logger(msg)
 }
 
-func (u *EasyUdpServer) close() {
+func (u *EasyUdpServer) Close() {
 	u.listener.Close()
 }
 
@@ -133,18 +133,4 @@ func getUdpListener(proto string, port int) (*net.UDPConn, error) {
 
 func udpaddr2str(add *net.UDPAddr) (s string) {
 	return fmt.Sprintf("%v:%v", add.IP, add.Port)
-}
-
-func main() {
-	logger := func(s string) {
-		fmt.Println(s)
-	}
-	responser := func(string) string {
-		return "OK"
-	}
-	server, err := NewEasyUdpServer(Udp4, 8082, 4, 4096, 4096, responser, logger)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 }

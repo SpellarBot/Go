@@ -1,24 +1,56 @@
-package main
+package easyserver
 
 import (
-	"fmt"
 	"net"
-	"os"
+	"strconv"
 )
 
-func main() {
-	conn, err := net.Dial("udp", "127.0.0.1:8082")
-	defer conn.Close()
-	if err != nil {
-		os.Exit(1)
+type EasyUdpClient struct {
+	UType    UdpType
+	Host     string
+	Port     int
+	Logger   func(string)
+	listener net.Conn
+}
+
+func NewEasyUdpClient(utype UdpType,
+	host string,
+	port int,
+	logger func(string)) (*EasyUdpClient, error) {
+	server := EasyUdpClient{
+		UType:  utype,
+		Host:   host,
+		Port:   port,
+		Logger: logger,
 	}
+	err := server.Init()
+	return &server, err
+}
 
-	conn.Write([]byte("Hello world!"))
+func (u *EasyUdpClient) Init() (err error) {
+	u.listener, err = net.Dial(string(u.UType), u.Host+":"+strconv.Itoa(u.Port))
+	if err != nil {
+		u.Logger("UDP Client Conn Fail")
+	} else {
+		u.Logger("UDP CLient Conn Succ")
+	}
+	return err
+}
 
-	fmt.Println("send msg")
+func (u *EasyUdpClient) Close() {
+	u.listener.Close()
+}
 
-	var msg [20]byte
-	conn.Read(msg[0:])
-
-	fmt.Println("msg is", string(msg[0:10]))
+func (u *EasyUdpClient) Send(msg string) (s string, err error) {
+	var read int
+	get := make([]byte, 4096)
+	_, err = u.listener.Write([]byte(msg))
+	if err == nil {
+		u.Logger("Send Msg Succ: " + msg)
+		read, err = u.listener.Read(get)
+		s = string(get[0:read])
+	} else {
+		u.Logger("Send Msg Fail: " + msg)
+	}
+	return s, err
 }
