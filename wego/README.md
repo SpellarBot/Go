@@ -9,3 +9,26 @@
     * go get -u -v github.com/lukehoban/go-outline
     * go get -u -v sourcegraph.com/sqs/goreturns
     * go get -u -v golang.org/x/tools/cmd/gorename
+
+
+
+#### common moudle
+    * easyserver
+        * tcp (ToComplete)
+        * udp (ToComplete)
+        * http (ToDo)
+    * mysql
+    * logger
+    * redis (ToDo)
+    * memcache (ToDo)
+    * kafka (ToDo)
+    * abtest (ToDo)
+    * model (ToDo)
+        * lr
+        * word2vec
+            * cbow
+        * svm
+        * tree
+            * dtree
+            * rf
+            * gbdt
