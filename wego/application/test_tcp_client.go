@@ -11,14 +11,14 @@ func testTcp() {
 		fmt.Println(s)
 	}
 	client, _ := easyserver.NewEasyTcpClient(easyserver.Tcp4, "127.0.0.1", 8082, logger)
-	defer client.Close()
+	//defer client.Close()
 	client.Send([]byte("abcdefghjiklmnopkrstuvwxyzabcdefghjiklmnopkrstuvwxyz"))
 
 }
 
 func main() {
 	for i := 0; i < 100; i++ {
-		testTcp()
+		go testTcp()
 	}
 	time.Sleep(20 * time.Second)
 }
