@@ -9,9 +9,11 @@ func main() {
 	wait := sync.WaitGroup{}
 	wait.Add(1)
 	server := easyserver.EasyTcpServer{
-		Port:    8082,
-		TType:   easyserver.Tcp4,
-		Threads: 4,
+		Port:        8082,
+		TType:       easyserver.Tcp4,
+		Threads:     4,
+		WriteBuffer: 4096,
+		ReadBuffer:  4096,
 	}
 	server.Init()
 	defer server.Close()

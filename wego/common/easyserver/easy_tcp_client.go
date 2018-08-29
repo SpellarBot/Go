@@ -6,22 +6,28 @@ import (
 )
 
 type EasyTcpClient struct {
-	TType  TcpType
-	Host   string
-	Port   int
-	Logger func(string)
-	conn   net.Conn
+	TType       TcpType
+	Host        string
+	Port        int
+	WriteBuffer int
+	ReadBuffer  int
+	Logger      func(string)
+	conn        net.Conn
 }
 
 func NewEasyTcpClient(ttype TcpType,
 	host string,
 	port int,
+	writebuffer int,
+	readbuffer int,
 	logger func(string)) (*EasyTcpClient, error) {
 	server := EasyTcpClient{
-		TType:  ttype,
-		Host:   host,
-		Port:   port,
-		Logger: logger,
+		TType:       ttype,
+		Host:        host,
+		Port:        port,
+		WriteBuffer: writebuffer,
+		ReadBuffer:  readbuffer,
+		Logger:      logger,
 	}
 	err := server.Init()
 	return &server, err
@@ -43,7 +49,7 @@ func (u *EasyTcpClient) Close() {
 
 func (u *EasyTcpClient) Send(msg []byte) (s []byte, err error) {
 	var read int
-	get := make([]byte, 4096)
+	get := make([]byte, u.ReadBuffer)
 	_, err = u.conn.Write(msg)
 	if err == nil {
 		u.Logger("Send Msg Succ: " + string(msg))

@@ -10,7 +10,7 @@ func testTcp() {
 	logger := func(s string) {
 		fmt.Println(s)
 	}
-	client, _ := easyserver.NewEasyTcpClient(easyserver.Tcp4, "127.0.0.1", 8082, logger)
+	client, _ := easyserver.NewEasyTcpClient(easyserver.Tcp4, "127.0.0.1", 8082, 4096, 4096, logger)
 	//defer client.Close()
 	client.Send([]byte("abcdefghjiklmnopkrstuvwxyzabcdefghjiklmnopkrstuvwxyz"))
 

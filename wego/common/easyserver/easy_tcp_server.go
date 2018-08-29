@@ -16,17 +16,39 @@ const (
 )
 
 type EasyTcpServer struct {
-	TType     TcpType
-	Port      int
-	Threads   int
-	Responser func([]byte) []byte
-	Logger    func(string)
+	TType       TcpType
+	Port        int
+	Threads     int
+	WriteBuffer int
+	ReadBuffer  int
+	Responser   func([]byte) []byte
+	Logger      func(string)
 
 	addr     *net.TCPAddr
 	listener *net.TCPListener
 }
 
-func (t *EasyTcpServer) Init() {
+func NewEasyTcpServer(ttype TcpType,
+	port int,
+	threads int,
+	writebuffer int,
+	readbuffer int,
+	responser func([]byte) []byte,
+	logger func(string)) (*EasyTcpServer, error) {
+	server := EasyTcpServer{
+		TType:       ttype,
+		Port:        port,
+		Threads:     threads,
+		Logger:      logger,
+		Responser:   responser,
+		WriteBuffer: writebuffer,
+		ReadBuffer:  readbuffer,
+	}
+	err := server.Init()
+	return &server, err
+}
+
+func (t *EasyTcpServer) Init() error {
 	var err error
 
 	if t.TType == TcpType("") {
@@ -48,6 +70,12 @@ func (t *EasyTcpServer) Init() {
 	if t.Threads <= 0 {
 		t.Threads = runtime.NumCPU()
 	}
+	if t.WriteBuffer < 64 {
+		t.WriteBuffer = 64
+	}
+	if t.ReadBuffer < 64 {
+		t.ReadBuffer = 64
+	}
 	t.addr, err = net.ResolveTCPAddr(string(t.TType), "0.0.0.0:"+strconv.Itoa(t.Port))
 	if err == nil {
 		t.listener, err = net.ListenTCP(string(t.TType), t.addr)
@@ -63,6 +91,7 @@ func (t *EasyTcpServer) Init() {
 	} else {
 		t.Logger(fmt.Sprintf("TCP Serve Start Fail: %s", err.Error()))
 	}
+	return err
 
 }
 
@@ -71,7 +100,7 @@ func (t *EasyTcpServer) Close() {
 }
 
 func (t *EasyTcpServer) readFromTcp(conn *net.TCPConn) ([]byte, error) {
-	readdata := make([]byte, 128)
+	readdata := make([]byte, t.ReadBuffer)
 	read, err := conn.Read(readdata)
 	if err == nil {
 		t.Logger(fmt.Sprintf("Read %d From %s Succ: %s", read, conn.RemoteAddr().String(), string(readdata[0:read])))
@@ -95,6 +124,8 @@ func (t *EasyTcpServer) listen() {
 	for {
 		conn, err := t.listener.AcceptTCP()
 		if err == nil {
+			conn.SetWriteBuffer(t.WriteBuffer)
+			conn.SetReadBuffer(t.ReadBuffer)
 			readdata, err = t.readFromTcp(conn)
 			if err == nil {
 				writedata = t.Responser(readdata)
