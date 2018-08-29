@@ -120,21 +120,28 @@ func (t *EasyTcpServer) writeToTcp(conn *net.TCPConn, writedata []byte) {
 }
 
 func (t *EasyTcpServer) listen() {
-	var readdata, writedata []byte
 	for {
+		fmt.Println("begin")
 		conn, err := t.listener.AcceptTCP()
 		if err == nil {
-			conn.SetWriteBuffer(t.WriteBuffer)
-			conn.SetReadBuffer(t.ReadBuffer)
-			readdata, err = t.readFromTcp(conn)
-			if err == nil {
-				writedata = t.Responser(readdata)
-				t.writeToTcp(conn, writedata)
-			} else {
-				t.Logger(fmt.Sprintf("Read From TCP Fail: %s", err.Error()))
-			}
+			go t.serve(conn)
 		} else {
 			t.Logger(fmt.Sprintf("Accept Conn Fail: %s", err.Error()))
 		}
+		fmt.Println("end")
+	}
+}
+
+func (t *EasyTcpServer) serve(conn *net.TCPConn) {
+	conn.SetWriteBuffer(t.WriteBuffer)
+	conn.SetReadBuffer(t.ReadBuffer)
+	var readdata, writedata []byte
+	var err error
+	readdata, err = t.readFromTcp(conn)
+	if err == nil {
+		writedata = t.Responser(readdata)
+		t.writeToTcp(conn, writedata)
+	} else {
+		t.Logger(fmt.Sprintf("Read From TCP Fail: %s", err.Error()))
 	}
 }

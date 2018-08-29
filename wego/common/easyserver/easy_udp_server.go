@@ -87,11 +87,15 @@ func (u *EasyUdpServer) Init() error {
 
 func (u *EasyUdpServer) listen() {
 	for {
-		readdata, remoteAddr, err := u.readFromUdp()
-		if err == nil {
-			senddata := u.Responser(readdata)
-			u.writeToUdp(remoteAddr, senddata)
-		}
+		go u.serve()
+	}
+}
+
+func (u *EasyUdpServer) serve() {
+	readdata, remoteAddr, err := u.readFromUdp()
+	if err == nil {
+		senddata := u.Responser(readdata)
+		u.writeToUdp(remoteAddr, senddata)
 	}
 }
 
