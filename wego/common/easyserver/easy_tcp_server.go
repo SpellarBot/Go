@@ -5,6 +5,7 @@ import (
 	"net"
 	"runtime"
 	"strconv"
+	"time"
 )
 
 type TcpType string
@@ -16,13 +17,16 @@ const (
 )
 
 type EasyTcpServer struct {
-	TType       TcpType
-	Port        int
-	Threads     int
-	WriteBuffer int
-	ReadBuffer  int
-	Responser   func([]byte) []byte
-	Logger      func(string)
+	TType        TcpType
+	Port         int
+	Threads      int
+	WriteBuffer  int
+	ReadBuffer   int
+	Timeout      time.Duration
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+	Responser    func([]byte) []byte
+	Logger       func(string)
 
 	addr     *net.TCPAddr
 	listener *net.TCPListener
@@ -33,16 +37,22 @@ func NewEasyTcpServer(ttype TcpType,
 	threads int,
 	writebuffer int,
 	readbuffer int,
+	timeout time.Duration,
+	readtimeout time.Duration,
+	writetimeout time.Duration,
 	responser func([]byte) []byte,
 	logger func(string)) (*EasyTcpServer, error) {
 	server := EasyTcpServer{
-		TType:       ttype,
-		Port:        port,
-		Threads:     threads,
-		Logger:      logger,
-		Responser:   responser,
-		WriteBuffer: writebuffer,
-		ReadBuffer:  readbuffer,
+		TType:        ttype,
+		Port:         port,
+		Threads:      threads,
+		Logger:       logger,
+		Responser:    responser,
+		WriteBuffer:  writebuffer,
+		ReadBuffer:   readbuffer,
+		Timeout:      timeout,
+		ReadTimeout:  readtimeout,
+		WriteTimeout: writetimeout,
 	}
 	err := server.Init()
 	return &server, err
@@ -124,6 +134,9 @@ func (t *EasyTcpServer) listen() {
 		fmt.Println("begin")
 		conn, err := t.listener.AcceptTCP()
 		if err == nil {
+			conn.SetDeadline(time.Now().Add(t.Timeout))
+			conn.SetReadDeadline(time.Now().Add(t.ReadTimeout))
+			conn.SetWriteDeadline(time.Now().Add(t.WriteTimeout))
 			go t.serve(conn)
 		} else {
 			t.Logger(fmt.Sprintf("Accept Conn Fail: %s", err.Error()))
