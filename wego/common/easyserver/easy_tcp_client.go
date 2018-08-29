@@ -5,20 +5,20 @@ import (
 	"strconv"
 )
 
-type EasyUdpClient struct {
-	UType  UdpType
+type EasyTcpClient struct {
+	TType  TcpType
 	Host   string
 	Port   int
 	Logger func(string)
 	conn   net.Conn
 }
 
-func NewEasyUdpClient(utype UdpType,
+func NewEasyTcpClient(ttype TcpType,
 	host string,
 	port int,
-	logger func(string)) (*EasyUdpClient, error) {
-	server := EasyUdpClient{
-		UType:  utype,
+	logger func(string)) (*EasyTcpClient, error) {
+	server := EasyTcpClient{
+		TType:  ttype,
 		Host:   host,
 		Port:   port,
 		Logger: logger,
@@ -27,21 +27,21 @@ func NewEasyUdpClient(utype UdpType,
 	return &server, err
 }
 
-func (u *EasyUdpClient) Init() (err error) {
-	u.conn, err = net.Dial(string(u.UType), u.Host+":"+strconv.Itoa(u.Port))
+func (u *EasyTcpClient) Init() (err error) {
+	u.conn, err = net.Dial(string(u.TType), u.Host+":"+strconv.Itoa(u.Port))
 	if err != nil {
-		u.Logger("UDP Client Conn Fail")
+		u.Logger("TCP Client Conn Fail")
 	} else {
-		u.Logger("UDP CLient Conn Succ")
+		u.Logger("TCP CLient Conn Succ")
 	}
 	return err
 }
 
-func (u *EasyUdpClient) Close() {
+func (u *EasyTcpClient) Close() {
 	u.conn.Close()
 }
 
-func (u *EasyUdpClient) Send(msg []byte) (s []byte, err error) {
+func (u *EasyTcpClient) Send(msg []byte) (s []byte, err error) {
 	var read int
 	get := make([]byte, 4096)
 	_, err = u.conn.Write(msg)

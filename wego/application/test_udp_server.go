@@ -13,10 +13,10 @@ func main() {
 	logger := func(s string) {
 		fmt.Println(s)
 	}
-	responser := func(string) string {
-		return "OK"
+	responser := func(s []byte) []byte {
+		return []byte("OK")
 	}
-	server, err := easyserver.NewEasyUdpServer(easyserver.Udp4, 8082, 4, 4096, 4096, responser, logger)
+	server, err := easyserver.NewEasyUdpServer(easyserver.Udp4, 8082, 4, 64, 64, responser, logger)
 	defer server.Close()
 	if err != nil {
 		fmt.Println(err)
