@@ -93,7 +93,6 @@ func (t *EasyTcpServer) writeToTcp(conn *net.TCPConn, writedata []byte) {
 func (t *EasyTcpServer) listen() {
 	var readdata, writedata []byte
 	for {
-		fmt.Println("I am listening")
 		conn, err := t.listener.AcceptTCP()
 		if err == nil {
 			readdata, err = t.readFromTcp(conn)
