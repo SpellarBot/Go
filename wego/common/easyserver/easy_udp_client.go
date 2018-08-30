@@ -13,20 +13,6 @@ type EasyUdpClient struct {
 	conn   net.Conn
 }
 
-func NewEasyUdpClient(utype UdpType,
-	host string,
-	port int,
-	logger func(string)) (*EasyUdpClient, error) {
-	server := EasyUdpClient{
-		UType:  utype,
-		Host:   host,
-		Port:   port,
-		Logger: logger,
-	}
-	err := server.Init()
-	return &server, err
-}
-
 func (u *EasyUdpClient) Init() (err error) {
 	u.conn, err = net.Dial(string(u.UType), u.Host+":"+strconv.Itoa(u.Port))
 	if err != nil {

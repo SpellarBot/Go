@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 	"wego/common/easyserver"
 )
@@ -10,11 +11,19 @@ func main() {
 	logger := func(s string) {
 		fmt.Println(s)
 	}
-	client, _ := easyserver.NewEasyUdpClient(easyserver.Udp4, "127.0.0.1", 8082, logger)
-	defer client.Close()
-	for i := 0; i < 100; i++ {
-		go client.Send([]byte("abcdefghjiklmnopkrstuvwxyzabcdefghjiklmnopkrstuvwxyz"))
-		time.Sleep(100 * time.Nanosecond)
+	client := easyserver.EasyUdpClient{
+		UType:  easyserver.UDP4,
+		Host:   "127.0.0.1",
+		Port:   8082,
+		Logger: logger,
 	}
-	time.Sleep(20 * time.Second)
+	err := client.Init()
+	defer client.Close()
+	if err == nil {
+		for i := 0; i < 100; i++ {
+			go client.Send([]byte(strconv.Itoa(i) + "abcdefghjiklmnopkrstuvwxyzabcdefghjiklmnopkrstuvwxyz"))
+			time.Sleep(100 * time.Nanosecond)
+		}
+		time.Sleep(20 * time.Second)
+	}
 }

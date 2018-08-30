@@ -11,58 +11,32 @@ import (
 type TcpType string
 
 const (
-	Tcp  = TcpType("tcp")
-	Tcp4 = TcpType("tcp4")
-	Tcp6 = TcpType("tcp6")
+	TCP  = TcpType("tcp")
+	TCP4 = TcpType("tcp4")
+	TCP6 = TcpType("tcp6")
 )
 
 type EasyTcpServer struct {
-	TType        TcpType
-	Port         int
-	Threads      int
-	WriteBuffer  int
-	ReadBuffer   int
-	Timeout      time.Duration
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
-	Responser    func([]byte) []byte
-	Logger       func(string)
+	TType         TcpType
+	Port          int
+	Threads       int
+	WriteBuffer   int
+	ReadBuffer    int
+	Timeout       time.Duration
+	ReadTimeout   time.Duration
+	WriteTimeout  time.Duration
+	KeepAliveTime time.Duration
+	Responser     func([]byte) []byte
+	Logger        func(string)
 
 	addr     *net.TCPAddr
 	listener *net.TCPListener
 }
 
-func NewEasyTcpServer(ttype TcpType,
-	port int,
-	threads int,
-	writebuffer int,
-	readbuffer int,
-	timeout time.Duration,
-	readtimeout time.Duration,
-	writetimeout time.Duration,
-	responser func([]byte) []byte,
-	logger func(string)) (*EasyTcpServer, error) {
-	server := EasyTcpServer{
-		TType:        ttype,
-		Port:         port,
-		Threads:      threads,
-		Logger:       logger,
-		Responser:    responser,
-		WriteBuffer:  writebuffer,
-		ReadBuffer:   readbuffer,
-		Timeout:      timeout,
-		ReadTimeout:  readtimeout,
-		WriteTimeout: writetimeout,
-	}
-	err := server.Init()
-	return &server, err
-}
-
 func (t *EasyTcpServer) Init() error {
 	var err error
-
 	if t.TType == TcpType("") {
-		t.TType = Tcp4
+		t.TType = TCP4
 	}
 	if t.Logger == nil {
 		t.Logger = func(s string) {
@@ -75,16 +49,16 @@ func (t *EasyTcpServer) Init() error {
 		}
 	}
 	if t.Port < 0 {
-		t.Port = 8080
+		t.Port = DEFAULT_PORT
 	}
 	if t.Threads <= 0 {
 		t.Threads = runtime.NumCPU()
 	}
-	if t.WriteBuffer < 64 {
-		t.WriteBuffer = 64
+	if t.WriteBuffer < MIN_WRITE_BUFFER && t.WriteBuffer > 0 {
+		t.WriteBuffer = MIN_WRITE_BUFFER
 	}
-	if t.ReadBuffer < 64 {
-		t.ReadBuffer = 64
+	if t.ReadBuffer < MIN_READ_BUFFER && t.ReadBuffer > 0 {
+		t.ReadBuffer = MIN_READ_BUFFER
 	}
 	t.addr, err = net.ResolveTCPAddr(string(t.TType), "0.0.0.0:"+strconv.Itoa(t.Port))
 	if err == nil {
@@ -131,17 +105,34 @@ func (t *EasyTcpServer) writeToTcp(conn *net.TCPConn, writedata []byte) {
 
 func (t *EasyTcpServer) listen() {
 	for {
-		fmt.Println("begin")
 		conn, err := t.listener.AcceptTCP()
 		if err == nil {
-			conn.SetDeadline(time.Now().Add(t.Timeout))
-			conn.SetReadDeadline(time.Now().Add(t.ReadTimeout))
-			conn.SetWriteDeadline(time.Now().Add(t.WriteTimeout))
+			t.setTime(conn)
 			go t.serve(conn)
 		} else {
 			t.Logger(fmt.Sprintf("Accept Conn Fail: %s", err.Error()))
 		}
-		fmt.Println("end")
+	}
+}
+
+func (t *EasyTcpServer) setTime(conn *net.TCPConn) {
+	if t.KeepAliveTime > 0 {
+		conn.SetKeepAlivePeriod(t.KeepAliveTime)
+	}
+	if t.Timeout > 0 {
+		conn.SetDeadline(time.Now().Add(t.Timeout))
+	}
+	if t.WriteTimeout > 0 {
+		conn.SetReadDeadline(time.Now().Add(t.ReadTimeout))
+	}
+	if t.ReadTimeout > 0 {
+		conn.SetWriteDeadline(time.Now().Add(t.WriteTimeout))
+	}
+	if t.WriteBuffer > 0 {
+		conn.SetWriteBuffer(t.WriteBuffer)
+	}
+	if t.ReadBuffer > 0 {
+		conn.SetReadBuffer(t.ReadBuffer)
 	}
 }
 
@@ -150,11 +141,14 @@ func (t *EasyTcpServer) serve(conn *net.TCPConn) {
 	conn.SetReadBuffer(t.ReadBuffer)
 	var readdata, writedata []byte
 	var err error
-	readdata, err = t.readFromTcp(conn)
-	if err == nil {
-		writedata = t.Responser(readdata)
-		t.writeToTcp(conn, writedata)
-	} else {
-		t.Logger(fmt.Sprintf("Read From TCP Fail: %s", err.Error()))
+	for {
+		readdata, err = t.readFromTcp(conn)
+		if err == nil {
+			writedata = t.Responser(readdata)
+			t.writeToTcp(conn, writedata)
+		} else {
+			t.Logger(fmt.Sprintf("Read From TCP Fail: %s", err.Error()))
+			break
+		}
 	}
 }

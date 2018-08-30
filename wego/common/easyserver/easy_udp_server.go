@@ -9,9 +9,12 @@ import (
 type UdpType string
 
 const (
-	Udp  = UdpType("udp")
-	Udp4 = UdpType("udp4")
-	Udp6 = UdpType("udp6")
+	UDP              = UdpType("udp")
+	UDP4             = UdpType("udp4")
+	UDP6             = UdpType("udp6")
+	DEFAULT_PORT     = 8080
+	MIN_WRITE_BUFFER = 64
+	MIN_READ_BUFFER  = 64
 )
 
 type EasyUdpServer struct {
@@ -23,26 +26,6 @@ type EasyUdpServer struct {
 	WriteBuffer int
 	ReadBuffer  int
 	listener    *net.UDPConn
-}
-
-func NewEasyUdpServer(utype UdpType,
-	port int,
-	threads int,
-	writebuffer int,
-	readbuffer int,
-	responser func([]byte) []byte,
-	logger func(string)) (*EasyUdpServer, error) {
-	server := EasyUdpServer{
-		UType:       utype,
-		Port:        port,
-		Threads:     threads,
-		Logger:      logger,
-		Responser:   responser,
-		WriteBuffer: writebuffer,
-		ReadBuffer:  readbuffer,
-	}
-	err := server.Init()
-	return &server, err
 }
 
 func (u *EasyUdpServer) Init() error {
@@ -57,22 +40,26 @@ func (u *EasyUdpServer) Init() error {
 		}
 	}
 	if u.Port < 0 {
-		u.Port = 8080
+		u.Port = DEFAULT_PORT
 	}
 	if u.Threads <= 0 {
 		u.Threads = runtime.NumCPU()
 	}
-	if u.WriteBuffer < 64 {
-		u.WriteBuffer = 64
+	if u.WriteBuffer < MIN_WRITE_BUFFER && u.WriteBuffer >= 0 {
+		u.WriteBuffer = MIN_WRITE_BUFFER
 	}
-	if u.ReadBuffer < 64 {
-		u.ReadBuffer = 64
+	if u.ReadBuffer < MIN_READ_BUFFER && u.ReadBuffer >= 0 {
+		u.ReadBuffer = MIN_READ_BUFFER
 	}
 	var err error
 	u.listener, err = getUdpListener(string(u.UType), u.Port)
 	if err == nil {
-		u.listener.SetReadBuffer(u.ReadBuffer)
-		u.listener.SetWriteBuffer(u.WriteBuffer)
+		if u.ReadBuffer >= 0 {
+			u.listener.SetReadBuffer(u.ReadBuffer)
+		}
+		if u.WriteBuffer >= 0 {
+			u.listener.SetWriteBuffer(u.WriteBuffer)
+		}
 		u.Logger(fmt.Sprintf("UDP Serve Start Succ At Port %d", u.Port))
 		u.Logger(fmt.Sprintf("UDP Serve Start %d Threads", u.Threads))
 		for i := 0; i < u.Threads; i++ {
@@ -87,16 +74,16 @@ func (u *EasyUdpServer) Init() error {
 
 func (u *EasyUdpServer) listen() {
 	for {
-		go u.serve()
+		readdata, remoteAddr, err := u.readFromUdp()
+		if err == nil {
+			go u.serve(readdata, remoteAddr)
+		}
 	}
 }
 
-func (u *EasyUdpServer) serve() {
-	readdata, remoteAddr, err := u.readFromUdp()
-	if err == nil {
-		senddata := u.Responser(readdata)
-		u.writeToUdp(remoteAddr, senddata)
-	}
+func (u *EasyUdpServer) serve(readdata []byte, remoteAddr *net.UDPAddr) {
+	senddata := u.Responser(readdata)
+	u.writeToUdp(remoteAddr, senddata)
 }
 
 func (u *EasyUdpServer) readFromUdp() ([]byte, *net.UDPAddr, error) {
