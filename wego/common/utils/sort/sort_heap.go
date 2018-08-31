@@ -1,50 +1,52 @@
 package sort
 
-import (
-	"fmt"
-)
-
-func sift(a []int, k int, m int) {
+func sift(s SortData, k int, m int, desc bool) {
 	i := k
 	j := 2*i + 1
-	var x int
-	for {
-		if j > m {
-			return
+	if desc {
+		for {
+			if j > m {
+				return
+			}
+			if j < m && s.Compare(j, j+1) {
+				j++
+			}
+			if s.Compare(j, i) {
+				return
+			} else {
+				s.Swap(i, j)
+				i = j
+				j = 2*i + 1
+			}
 		}
-		if j < m && a[j] < a[j+1] {
-			j++
+	} else {
+		for {
+			if j > m {
+				return
+			}
+			if j < m && s.Compare(j+1, j) {
+				j++
+			}
+			if s.Compare(i, j) {
+				return
+			} else {
+				s.Swap(i, j)
+				i = j
+				j = 2*i + 1
+			}
 		}
-		if a[i] > a[j] {
-			return
-		} else {
-			x = a[i]
-			a[i] = a[j]
-			a[j] = x
-			i = j
-			j = 2*i + 1
-		}
-		//fmt.Println("----")
-		//print_array(a)
 	}
 
 }
 
-func SortHeap(a []int) {
-	N := len(a)
-	var x int
+func SortHeap(s SortData, desc bool) {
+	N := s.Len()
 	for i := N / 2; i >= 1; i-- {
-		fmt.Println("####")
-		sift(a, i-1, N-1)
+		sift(s, i-1, N-1, desc)
 	}
-	//print_array(a)
 	for i := 1; i < N; i++ {
-		x = a[0]
-		a[0] = a[N-i]
-		a[N-i] = x
-		sift(a, 0, N-i-1)
-		fmt.Println(i, "----")
-		//print_array(a)
+		s.Swap(0, N-i)
+		sift(s, 0, N-i-1, desc)
 	}
 	return
 }

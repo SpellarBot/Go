@@ -1,64 +1,95 @@
 package sort
 
-func part(L []int) ([]int, []int) {
-	L1 := make([]int, 0)
-	L2 := make([]int, 0)
-	N := len(L)
-	if N > 1 {
-		n := N / 2
-		L1 = L[0:n]
-		L2 = L[n:N]
+func index(s SortData, L []int, start, N int) {
+	for i := start; i < start+N; i++ {
+		s.Swap(i, L[i-start])
+		change(L, i, L[i-start])
 	}
-	return L1, L2
 }
 
-func merge(L1 []int, L2 []int) []int {
-	N1 := len(L1)
-	N2 := len(L2)
-	i, j := 0, 0
-	var x, y int
-	L := make([]int, 0)
-	for {
-		if (i >= N1) && (j >= N2) {
-			break
-		} else {
-			if i < N1 && j < N2 {
-				x = L1[i]
-				y = L2[j]
-				if x < y {
-					L = append(L, x)
+func change(L []int, x int, n int) {
+	for k, v := range L {
+		if v == x {
+			L[k] = n
+		}
+	}
+}
+
+func merge(s SortData, start, k, end int, desc bool) {
+	n1 := k - start + 1
+	n2 := end - k
+	N := n1 + n2
+	i, j := start, k+1
+	var L []int
+	L = make([]int, N)
+	k0 := 0
+	if desc {
+		for {
+			if i <= k && j <= end {
+				if s.Compare(i, j) {
+					L[k0] = i
 					i++
 				} else {
-					L = append(L, y)
+					L[k0] = j
 					j++
 				}
 			} else {
-				if i < N1 {
-					L = append(L, L1[i])
+				if i <= k && j > end {
+					L[k0] = i
 					i++
-				} else {
-					L = append(L, L2[j])
+				}
+				if i > k && j <= end {
+					L[k0] = j
 					j++
 				}
+				if i > k && j > end {
+					break
+				}
 			}
+			k0++
+		}
+	} else {
+		for {
+			if i <= k && j <= end {
+				if !s.Compare(i, j) {
+					L[k0] = i
+					i++
+				} else {
+					L[k0] = j
+					j++
+				}
+			} else {
+				if i <= k && j > end {
+					L[k0] = i
+					i++
+				}
+				if i > k && j <= end {
+					L[k0] = j
+					j++
+				}
+				if i > k && j > end {
+					break
+				}
+			}
+			k0++
 		}
 	}
-	return L
-
+	index(s, L, start, N)
 }
 
-func SortMerge(L []int) {
-	N := len(L)
+func sortMerge(s SortData, start, end int, desc bool) {
+	N := end - start + 1
+	k := start + N/2 - 1
 	if N > 1 {
-		L1, L2 := part(L)
-		SortMerge(L1)
-		SortMerge(L2)
-		L3 := merge(L1, L2)
-		for i := 0; i < N; i++ {
-			L[i] = L3[i]
-		}
-		return
-	} else {
+		sortMerge(s, start, k, desc)
+		sortMerge(s, k+1, end, desc)
+		merge(s, start, k, end, desc)
 		return
 	}
+	return
+}
+
+func SortMerge(s SortData, desc bool) {
+	N := s.Len()
+	sortMerge(s, 0, N-1, desc)
 }
