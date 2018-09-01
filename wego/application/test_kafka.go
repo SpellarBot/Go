@@ -1,6 +1,6 @@
 package main
 
-import "common/kafka"
+import "wego/common/kafka"
 
 kafkaClient := kafka.KafkaClient{
 	Topic:         "KafkaTopicName",
