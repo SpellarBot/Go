@@ -14,8 +14,8 @@ type EasyTcpClient struct {
 	Timeout      time.Duration
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
-
-	Logger func(string)
+	ReadBuffer   int
+	Logger       func(string)
 
 	lock sync.RWMutex
 	conn net.Conn
