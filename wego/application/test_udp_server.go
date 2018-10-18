@@ -16,12 +16,23 @@ func main() {
 	responser := func(s []byte) []byte {
 		return []byte("OK")
 	}
-	server, err := easyserver.NewEasyUdpServer(easyserver.Udp4, 8082, 4, 64, 64, responser, logger)
-	defer server.Close()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	server := easyserver.EasyUdpServer{
+		UType:       easyserver.UDP4,
+		Port:        8082,
+		Threads:     4,
+		Logger:      logger,
+		Responser:   responser,
+		WriteBuffer: 64,
+		ReadBuffer:  64,
 	}
-	fmt.Println(server)
+	err := server.Init()
+	if err == nil {
+		defer server.Close()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Println(server)
+	}
 	wait.Wait()
 }

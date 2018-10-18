@@ -1,38 +1,31 @@
 package sort
 
-func SortEasySelect(a []interface{}, desc bool, compare func(a interface{}, b interface{}) bool) {
-	N := len(a)
+func SortEasySelect(s SortData, desc bool) {
+	N := s.Len()
 	var k int
-	var x interface{}
-	var m interface{}
 	if desc {
 		for i := 0; i < N; i++ {
 			k = i
-			m = a[i]
 			for j := (i + 1); j < N; j++ {
-				if !compare(m, a[j]) {
+				if !s.Compare(i, j) {
 					k = j
-					m = a[j]
 				}
 			}
-			x = a[i]
-			a[i] = a[k]
-			a[k] = x
+			if k != i {
+				s.Swap(i, k)
+			}
 		}
 	} else {
 		for i := 0; i < N; i++ {
 			k = i
-			m = a[i]
 			for j := (i + 1); j < N; j++ {
-				if compare(m, a[j]) {
+				if s.Compare(i, j) {
 					k = j
-					m = a[j]
 				}
 			}
-			x = a[i]
-			a[i] = a[k]
-			a[k] = x
+			if k != i {
+				s.Swap(i, k)
+			}
 		}
 	}
-
 }

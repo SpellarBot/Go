@@ -1,31 +1,37 @@
 ﻿package sort
 
-//插入排序
-func SortInsert(a []int) {
-	for i, k := range a {
-		if i == 0 {
-			continue
-		}
-		//print_array(a[0:i])
-		//f.Println(i+1, k)
-		insert(a[0:i+1], i+1, k)
+func SortInsert(s SortData, desc bool) {
+	N := s.Len()
+	for i := 1; i < N; i++ {
+		insert(s, i, desc)
 	}
-
 }
 
-// a[N-1] = x, a[0:N-2] in order
-func insert(a []int, N int, x int) {
+func insert(s SortData, N int, desc bool) {
 	var k int
-	for k = 0; k < N-1; k++ {
-		if x < a[k] {
-			break
+	if desc {
+		for k = 0; k <= N; k++ {
+			if s.Compare(N, k) {
+				break
+			}
+		}
+		if k == N {
+			return
+		}
+		for i := k + 1; i <= N; i++ {
+			s.Swap(k, i)
+		}
+	} else {
+		for k = 0; k <= N-1; k++ {
+			if !s.Compare(N, k) {
+				break
+			}
+		}
+		if k == N {
+			return
+		}
+		for i := k + 1; i <= N; i++ {
+			s.Swap(k, i)
 		}
 	}
-	//f.Println("The location is", k)
-	for i := N - 1; i > k; i-- {
-		//f.Println(a[i], a[i-1])
-		a[i] = a[i-1]
-
-	}
-	a[k] = x
 }

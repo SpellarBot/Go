@@ -1,58 +1,81 @@
 ﻿package sort
 
-//快速排序
-
-import (
-	"fmt"
-)
-
-func partition(a []int, first int, end int) int {
-	m := first
+func partition(s SortData, start, end int, desc bool) int {
+	m := start
 	n := end
-	var x int
-	for {
-		fmt.Println(m, n)
-		if m >= n {
-			break
-		}
+	if desc {
 		for {
-			if m < n && a[m] <= a[n] {
-				n--
-			} else {
+			if m >= n {
 				break
 			}
-		}
-		if m < n {
-			x = a[m]
-			a[m] = a[n]
-			a[n] = x
-			m++
-		}
-
-		for {
-			if m < n && a[m] <= a[n] {
+			for {
+				// fmt.Println(n, m)
+				if m < n && s.Compare(m, n) {
+					n--
+				} else {
+					break
+				}
+			}
+			if m < n {
+				s.Swap(m, n)
 				m++
-			} else {
-				break
+			}
+			for {
+				if m < n && s.Compare(m, n) {
+					m++
+				} else {
+					break
+				}
+			}
+			if m < n {
+				s.Swap(m, n)
+				n--
 			}
 		}
-		if m < n {
-			x = a[m]
-			a[m] = a[n]
-			a[n] = x
-			n--
+	} else {
+		for {
+			if m >= n {
+				break
+			}
+			for {
+				// fmt.Println(n, m)
+				if m < n && s.Compare(n, m) {
+					n--
+				} else {
+					break
+				}
+			}
+			if m < n {
+				s.Swap(m, n)
+				m++
+			}
+			for {
+				if m < n && s.Compare(n, m) {
+					m++
+				} else {
+					break
+				}
+			}
+			if m < n {
+				s.Swap(m, n)
+				n--
+			}
 		}
 	}
-	return m
+	return n
 }
 
-func SortQuick(a []int) {
-	N := len(a)
+func sortQuick(s SortData, start, end int, desc bool) {
+	N := end - start + 1
 	if N <= 1 {
 		return
 	}
-	i := partition(a, 0, N-1)
-	//fmt.Println(i)
-	SortQuick(a[0 : i+1])
-	SortQuick(a[i+1 : N])
+	i := partition(s, start, end, desc)
+	sortQuick(s, start, i-1, desc)
+	sortQuick(s, i+1, end, desc)
+}
+
+func SortQuick(s SortData, desc bool) {
+	N := s.Len()
+	sortQuick(s, 0, N-1, desc)
 }
