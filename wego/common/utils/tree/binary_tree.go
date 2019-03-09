@@ -10,13 +10,13 @@ type BinaryNode struct {
 	Right *BinaryNode
 }
 
-func (B *BinaryNode) Set_value(a float64) {
+func (B *BinaryNode) SetValue(a float64) {
 	(*B).Value = a
 }
-func (B *BinaryNode) Set_left(b1 BinaryNode) {
+func (B *BinaryNode) SetLeft(b1 BinaryNode) {
 	(*B).Left = &b1
 }
-func (B *BinaryNode) Set_right(b1 BinaryNode) {
+func (B *BinaryNode) SetRight(b1 BinaryNode) {
 	(*B).Right = &b1
 }
 
@@ -60,7 +60,6 @@ func PreOrder(N BinaryNode, a []float64) []float64 {
 	if N.Left == nil && N.Right == nil {
 		return a
 	} else {
-		//fmt.Println("---------")
 		if N.Left != nil {
 			a = PreOrder(*(N.Left), a)
 		}

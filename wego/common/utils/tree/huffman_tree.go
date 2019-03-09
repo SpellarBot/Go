@@ -25,7 +25,6 @@ func SetHuffmanTree(a map[string]float64, K *KeyNode) *KeyNode {
 		if len(a) == 1 {
 			return K
 		}
-		//fmt.Println("==============")
 		fmt.Println("length:", len(a))
 		fmt.Println(K.Key)
 		delete(a, i0)
