@@ -23,7 +23,7 @@ func SetHuffmanTree(a map[string]float64, K *KeyNode) *KeyNode {
 	i0, a0 := Findmin(a)
 	for {
 		if len(a) == 1 {
-			return K
+			break
 		}
 		fmt.Println("length:", len(a))
 		fmt.Println(K.Key)
