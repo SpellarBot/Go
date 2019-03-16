@@ -74,6 +74,23 @@ func WriteByteToFile(filename string, data []byte) (e error) {
 	e = ioutil.WriteFile(filename, data, 0644)
 	return e
 }
+
+func AppendStringToFile(filename string, all string) (e error) {
+	data := []byte(all)
+	e = AppendByteToFile(filename, data)
+	return e
+}
+func AppendByteToFile(filename string, data []byte) (e error) {
+	datar, er := ReadByteFromFile(filename)
+	if er == nil {
+		datar = append(data, datar...)
+		e = WriteByteToFile(filename, datar)
+	} else {
+		e = er
+	}
+	return e
+}
+
 func ReadStringFromFile(filename string) (all string, e error) {
 	var data []byte
 	data, e = ReadByteFromFile(filename)
