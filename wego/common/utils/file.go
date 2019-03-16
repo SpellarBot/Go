@@ -1,8 +1,7 @@
-package main
+package utils
 
 import (
 	"bufio"
-	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -179,48 +178,4 @@ func (F *File) Close() (e error) {
 	}
 	e = F.file.Close()
 	return e
-}
-
-func main() {
-	// f, e := GetWriteFileHandle("TestFile")
-	// if e == nil {
-	// 	fmt.Println("Right Open")
-	// 	f.WriteLine("I am a he")
-	// 	f.WriteLine("I am a she")
-	// 	f.WriteLine("I am a it")
-	// } else {
-	// 	fmt.Println("Wrong Open")
-	// }
-	// f.Close()
-	// f, e := GetAppendFileHandle("TestFile")
-	// if e == nil {
-	// 	fmt.Println("Right Open")
-	// 	f.WriteLine("append:I am a he")
-	// 	f.WriteLine("append:I am a she")
-	// 	f.WriteLine("append:I am a it")
-	// } else {
-	// 	fmt.Println("Wrong Open")
-	// }
-	// f.Close()
-
-	// f, e := GetReadFileHandle("TestFile")
-	// if e == nil {
-	// 	fmt.Println("Right Open")
-	// 	var s []byte
-	// 	for {
-	// 		s, e = f.ReadLineByte()
-	// 		if e == nil {
-	// 			fmt.Println(s)
-	// 		} else {
-	// 			break
-	// 		}
-	// 	}
-	// } else {
-	// 	fmt.Println("Wrong Open")
-	// }
-	// f.Close()
-
-	fmt.Println(ReadStringFromFile("TestFile"))
-	// fmt.Println(ReadByteFromFile("TestFile"))
-	return
 }
