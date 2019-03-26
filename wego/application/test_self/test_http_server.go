@@ -19,10 +19,16 @@ func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(n, err)
 }
 
+func printNameHandler(w http.ResponseWriter, r *http.Request) {
+	n, err := w.Write([]byte(r.URL.Path))
+	fmt.Println(n, err)
+}
+
 func main() {
 	server := easyserver.EasyHttpServe{}
 	err := server.Init()
 	if err == nil {
+		server.AddRouter("/name/", printNameHandler)
 		server.AddRouter("/", helloWorldHandler)
 		server.Serve()
 		defer server.Close()

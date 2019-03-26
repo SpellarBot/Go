@@ -63,6 +63,8 @@ func (eht *EasyHttpServe) Init() (err error) {
 	return err
 }
 
+// ToDo: 自定义正则路由实现
+// ToDo: 区分Get/Post/Put等方法
 func (eht *EasyHttpServe) AddRouter(router string, response func(http.ResponseWriter, *http.Request)) {
 	eht.handler.HandleFunc(router, response)
 }
