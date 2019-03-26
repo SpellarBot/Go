@@ -6,17 +6,6 @@ import (
 	"runtime"
 )
 
-type UdpType string
-
-const (
-	UDP              = UdpType("udp")
-	UDP4             = UdpType("udp4")
-	UDP6             = UdpType("udp6")
-	DEFAULT_PORT     = 8080
-	MIN_WRITE_BUFFER = 64
-	MIN_READ_BUFFER  = 64
-)
-
 type EasyUdpServer struct {
 	UType       UdpType
 	Port        int
@@ -46,19 +35,19 @@ func (u *EasyUdpServer) Init() error {
 		u.Threads = runtime.NumCPU()
 	}
 	if u.WriteBuffer < MIN_WRITE_BUFFER && u.WriteBuffer >= 0 {
-		u.WriteBuffer = MIN_WRITE_BUFFER
+		u.WriteBuffer = DEFAULT_WRITE_BUFFER
 	}
 	if u.ReadBuffer < MIN_READ_BUFFER && u.ReadBuffer >= 0 {
-		u.ReadBuffer = MIN_READ_BUFFER
+		u.ReadBuffer = DEFAULT_READ_BUFFER
 	}
 	var err error
 	u.listener, err = getUdpListener(string(u.UType), u.Port)
 	if err == nil {
 		if u.ReadBuffer >= 0 {
-			u.listener.SetReadBuffer(u.ReadBuffer)
+			_ = u.listener.SetReadBuffer(u.ReadBuffer)
 		}
 		if u.WriteBuffer >= 0 {
-			u.listener.SetWriteBuffer(u.WriteBuffer)
+			_ = u.listener.SetWriteBuffer(u.WriteBuffer)
 		}
 		u.Logger(fmt.Sprintf("UDP Serve Start Succ At Port %d", u.Port))
 		u.Logger(fmt.Sprintf("UDP Serve Start %d Threads", u.Threads))
@@ -68,7 +57,6 @@ func (u *EasyUdpServer) Init() error {
 	} else {
 		u.Logger(fmt.Sprintf("UDP Serve Start Fail: %s", err.Error()))
 	}
-
 	return err
 }
 

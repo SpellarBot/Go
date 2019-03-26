@@ -8,14 +8,6 @@ import (
 	"time"
 )
 
-type TcpType string
-
-const (
-	TCP  = TcpType("tcp")
-	TCP4 = TcpType("tcp4")
-	TCP6 = TcpType("tcp6")
-)
-
 type EasyTcpServer struct {
 	TType         TcpType
 	Port          int
@@ -28,9 +20,8 @@ type EasyTcpServer struct {
 	KeepAliveTime time.Duration
 	Responser     func([]byte) []byte
 	Logger        func(string)
-
-	addr     *net.TCPAddr
-	listener *net.TCPListener
+	addr          *net.TCPAddr
+	listener      *net.TCPListener
 }
 
 func (t *EasyTcpServer) Init() error {
@@ -48,17 +39,17 @@ func (t *EasyTcpServer) Init() error {
 			return []byte("OK")
 		}
 	}
-	if t.Port < 0 {
+	if t.Port <= 0 || t.Port > 65535 {
 		t.Port = DEFAULT_PORT
 	}
 	if t.Threads <= 0 {
 		t.Threads = runtime.NumCPU()
 	}
-	if t.WriteBuffer < MIN_WRITE_BUFFER && t.WriteBuffer > 0 {
-		t.WriteBuffer = MIN_WRITE_BUFFER
+	if t.WriteBuffer < MIN_WRITE_BUFFER {
+		t.WriteBuffer = DEFAULT_WRITE_BUFFER
 	}
-	if t.ReadBuffer < MIN_READ_BUFFER && t.ReadBuffer > 0 {
-		t.ReadBuffer = MIN_READ_BUFFER
+	if t.ReadBuffer < MIN_READ_BUFFER {
+		t.ReadBuffer = DEFAULT_READ_BUFFER
 	}
 	t.addr, err = net.ResolveTCPAddr(string(t.TType), "0.0.0.0:"+strconv.Itoa(t.Port))
 	if err == nil {
@@ -79,8 +70,9 @@ func (t *EasyTcpServer) Init() error {
 
 }
 
-func (t *EasyTcpServer) Close() {
-	t.listener.Close()
+func (t *EasyTcpServer) Close() (err error) {
+	err = t.listener.Close()
+	return err
 }
 
 func (t *EasyTcpServer) readFromTcp(conn *net.TCPConn) ([]byte, error) {
@@ -117,28 +109,28 @@ func (t *EasyTcpServer) listen() {
 
 func (t *EasyTcpServer) setTime(conn *net.TCPConn) {
 	if t.KeepAliveTime > 0 {
-		conn.SetKeepAlivePeriod(t.KeepAliveTime)
+		_ = conn.SetKeepAlivePeriod(t.KeepAliveTime)
 	}
 	if t.Timeout > 0 {
-		conn.SetDeadline(time.Now().Add(t.Timeout))
+		_ = conn.SetDeadline(time.Now().Add(t.Timeout))
 	}
 	if t.WriteTimeout > 0 {
-		conn.SetReadDeadline(time.Now().Add(t.ReadTimeout))
+		_ = conn.SetReadDeadline(time.Now().Add(t.ReadTimeout))
 	}
 	if t.ReadTimeout > 0 {
-		conn.SetWriteDeadline(time.Now().Add(t.WriteTimeout))
+		_ = conn.SetWriteDeadline(time.Now().Add(t.WriteTimeout))
 	}
 	if t.WriteBuffer > 0 {
-		conn.SetWriteBuffer(t.WriteBuffer)
+		_ = conn.SetWriteBuffer(t.WriteBuffer)
 	}
 	if t.ReadBuffer > 0 {
-		conn.SetReadBuffer(t.ReadBuffer)
+		_ = conn.SetReadBuffer(t.ReadBuffer)
 	}
 }
 
 func (t *EasyTcpServer) serve(conn *net.TCPConn) {
-	conn.SetWriteBuffer(t.WriteBuffer)
-	conn.SetReadBuffer(t.ReadBuffer)
+	_ = conn.SetWriteBuffer(t.WriteBuffer)
+	_ = conn.SetReadBuffer(t.ReadBuffer)
 	var readdata, writedata []byte
 	var err error
 	for {

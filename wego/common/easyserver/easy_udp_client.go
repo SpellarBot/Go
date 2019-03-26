@@ -23,8 +23,9 @@ func (u *EasyUdpClient) Init() (err error) {
 	return err
 }
 
-func (u *EasyUdpClient) Close() {
-	u.conn.Close()
+func (u *EasyUdpClient) Close() (err error) {
+	err = u.conn.Close()
+	return err
 }
 
 func (u *EasyUdpClient) Send(msg []byte) (s []byte, err error) {

@@ -16,35 +16,39 @@ type EasyTcpClient struct {
 	WriteTimeout time.Duration
 	ReadBuffer   int
 	Logger       func(string)
-
-	lock sync.RWMutex
-	conn net.Conn
+	lock         sync.RWMutex
+	conn         net.Conn
 }
 
 func (t *EasyTcpClient) Init() (err error) {
 	t.conn, err = net.Dial(string(t.TType), t.Host+":"+strconv.Itoa(t.Port))
+	if t.WriteTimeout <= 0 {
+		t.WriteTimeout = DEFAULT_TIMEOUT
+	}
+	if t.ReadTimeout <= 0 {
+		t.ReadTimeout = DEFAULT_TIMEOUT
+	}
 	if err != nil {
 		t.Logger("TCP Client Conn Fail")
 	} else {
-		t.Logger("TCP CLient Conn Succ")
+		t.Logger("TCP Client Conn Succ")
+		t.lock = sync.RWMutex{}
+		if t.Timeout > 0 {
+			_ = t.conn.SetDeadline(time.Now().Add(t.Timeout))
+		}
+		if t.WriteTimeout > 0 {
+			_ = t.conn.SetReadDeadline(time.Now().Add(t.ReadTimeout))
+		}
+		if t.ReadTimeout > 0 {
+			_ = t.conn.SetWriteDeadline(time.Now().Add(t.WriteTimeout))
+		}
 	}
-	t.lock = sync.RWMutex{}
-
-	if t.Timeout > 0 {
-		t.conn.SetDeadline(time.Now().Add(t.Timeout))
-	}
-	if t.WriteTimeout > 0 {
-		t.conn.SetReadDeadline(time.Now().Add(t.ReadTimeout))
-	}
-	if t.ReadTimeout > 0 {
-		t.conn.SetWriteDeadline(time.Now().Add(t.WriteTimeout))
-	}
-
 	return err
 }
 
-func (u *EasyTcpClient) Close() {
-	u.conn.Close()
+func (u *EasyTcpClient) Close() (err error) {
+	err = u.conn.Close()
+	return err
 }
 
 func (u *EasyTcpClient) Send(msg []byte) (s []byte, err error) {
