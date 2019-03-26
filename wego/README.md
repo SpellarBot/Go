@@ -13,22 +13,22 @@
 
 
 #### common moudle
-    * easyserver
-        * tcp (ToComplete)
-        * udp (ToComplete)
-        * http (ToDo)
-    * mysql
-    * logger
-    * redis (ToDo)
-    * memcache (ToDo)
-    * kafka (ToDo)
-    * abtest (ToDo)
-    * model (ToDo)
-        * lr
-        * word2vec
-            * cbow
-        * svm
-        * tree
-            * dtree
-            * rf
-            * gbdt
+* easyserver
+    * tcp (ToComplete)
+    * udp (ToComplete)
+    * http (ToDo)
+* mysql
+* logger
+* redis (ToDo)
+* memcache (ToDo)
+* kafka (ToDo)
+* abtest (ToDo)
+* model (ToDo)
+    * lr
+    * word2vec
+        * cbow
+    * svm
+    * tree
+        * dtree
+        * rf
+        * gbdt

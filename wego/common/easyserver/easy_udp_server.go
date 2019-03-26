@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"runtime"
+	"sync"
 )
 
 type EasyUdpServer struct {
@@ -15,9 +16,12 @@ type EasyUdpServer struct {
 	WriteBuffer int
 	ReadBuffer  int
 	listener    *net.UDPConn
+	wait        sync.WaitGroup
 }
 
 func (u *EasyUdpServer) Init() error {
+	u.wait = sync.WaitGroup{}
+	u.wait.Add(1)
 	if u.Logger == nil {
 		u.Logger = func(s string) {
 			fmt.Println(s)
@@ -28,7 +32,7 @@ func (u *EasyUdpServer) Init() error {
 			return []byte("OK")
 		}
 	}
-	if u.Port < 0 {
+	if u.Port <= 0 || u.Port > 65535 {
 		u.Port = DEFAULT_PORT
 	}
 	if u.Threads <= 0 {
@@ -57,6 +61,7 @@ func (u *EasyUdpServer) Init() error {
 	} else {
 		u.Logger(fmt.Sprintf("UDP Serve Start Fail: %s", err.Error()))
 	}
+	u.wait.Wait()
 	return err
 }
 
