@@ -1,14 +1,11 @@
 package main
 
 import (
-	"sync"
 	"time"
 	"wego/common/easyserver"
 )
 
 func main() {
-	wait := sync.WaitGroup{}
-	wait.Add(1)
 	server := easyserver.EasyTcpServer{
 		Port:          8082,
 		TType:         easyserver.TCP4,
@@ -20,7 +17,8 @@ func main() {
 		WriteTimeout:  10 * time.Second,
 		KeepAliveTime: 1 * time.Second,
 	}
-	server.Init()
-	defer server.Close()
-	wait.Wait()
+	err := server.Init()
+	if err == nil {
+		defer server.Close()
+	}
 }

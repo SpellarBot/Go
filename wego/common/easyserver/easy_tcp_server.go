@@ -5,6 +5,7 @@ import (
 	"net"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -22,9 +23,12 @@ type EasyTcpServer struct {
 	Logger        func(string)
 	addr          *net.TCPAddr
 	listener      *net.TCPListener
+	wait          sync.WaitGroup
 }
 
 func (t *EasyTcpServer) Init() error {
+	t.wait = sync.WaitGroup{}
+	t.wait.Add(1)
 	var err error
 	if t.TType == TcpType("") {
 		t.TType = TCP4
@@ -66,8 +70,8 @@ func (t *EasyTcpServer) Init() error {
 	} else {
 		t.Logger(fmt.Sprintf("TCP Serve Start Fail: %s", err.Error()))
 	}
+	t.wait.Wait()
 	return err
-
 }
 
 func (t *EasyTcpServer) Close() (err error) {
