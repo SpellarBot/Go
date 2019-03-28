@@ -16,17 +16,17 @@
 * easyserver
     * tcp (ToComplete)
     * udp (ToComplete)
-    * http (ToDo)
+    * http (ToComplete)
+    * rpc (ToDo)
 * mysql
 * logger
 * redis (ToDo)
 * memcache (ToDo)
 * kafka (ToDo)
-* abtest (ToDo)
+* abtest
 * model (ToDo)
     * lr
     * word2vec
-        * cbow
     * svm
     * tree
         * dtree
