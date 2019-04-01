@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
-	"strconv"
 )
 
 const (
@@ -192,7 +191,7 @@ func (ab *ABTest) getExp(id string) (int, string, bool, uint64) {
 func (ab *ABTest) getLayers(expId int, bucket uint64) (s []string) {
 	s = make([]string, 0)
 	for _, val := range ab.layerRangeDict[expId] {
-		newBucket := ab.hash(strconv.Itoa(val.id)+strconv.Itoa(int(bucket))) % ab.bucketNum
+		newBucket := ab.hash(fmt.Sprintf("%d%d", val.id, bucket)) % ab.bucketNum
 		for _, layer := range val.rates {
 			if newBucket <= layer.val {
 				s = append(s, fmt.Sprintf("%d,%s:%d,%s", val.id, val.name, layer.id, layer.name))
