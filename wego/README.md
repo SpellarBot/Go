@@ -1,7 +1,7 @@
 #### Golang VsCode 环境搭建
 * ctrl + shift + p
 * ext install go
-* install go-pckage
+* install go-package
     * go get -u -v github.com/nsf/gocode
     * go get -u -v github.com/rogpeppe/godef
     * go get -u -v github.com/golang/lint/golint
